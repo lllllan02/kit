@@ -3,10 +3,268 @@ package kit
 import (
 	"fmt"
 	"math"
+	"math/rand"
+	"sort"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestContain(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Contain([]int{0, 1, 2, 3, 4, 5}, 5)
+	result2 := Contain([]int{0, 1, 2, 3, 4, 5}, 6)
+
+	is.Equal(result1, true)
+	is.Equal(result2, false)
+}
+
+func TestContainBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	type a struct {
+		A int
+		B string
+	}
+
+	a1 := []a{{A: 1, B: "1"}, {A: 2, B: "2"}, {A: 3, B: "3"}}
+	result1 := ContainBy(a1, func(t a) bool { return t.A == 1 && t.B == "2" })
+	result2 := ContainBy(a1, func(t a) bool { return t.A == 2 && t.B == "2" })
+
+	a2 := []string{"aaa", "bbb", "ccc"}
+	result3 := ContainBy(a2, func(t string) bool { return t == "ccc" })
+	result4 := ContainBy(a2, func(t string) bool { return t == "ddd" })
+
+	is.Equal(result1, false)
+	is.Equal(result2, true)
+	is.Equal(result3, true)
+	is.Equal(result4, false)
+}
+
+func TestEvery(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Every([]int{0, 1, 2, 3, 4, 5}, []int{0, 2})
+	result2 := Every([]int{0, 1, 2, 3, 4, 5}, []int{0, 6})
+	result3 := Every([]int{0, 1, 2, 3, 4, 5}, []int{-1, 6})
+	result4 := Every([]int{0, 1, 2, 3, 4, 5}, []int{})
+
+	is.True(result1)
+	is.False(result2)
+	is.False(result3)
+	is.True(result4)
+}
+
+func TestEveryBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := EveryBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 5
+	})
+
+	is.True(result1)
+
+	result2 := EveryBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 3
+	})
+
+	is.False(result2)
+
+	result3 := EveryBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 0
+	})
+
+	is.False(result3)
+
+	result4 := EveryBy([]int{}, func(x int) bool {
+		return x < 5
+	})
+
+	is.True(result4)
+}
+
+func TestSome(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Some([]int{0, 1, 2, 3, 4, 5}, []int{0, 2})
+	result2 := Some([]int{0, 1, 2, 3, 4, 5}, []int{0, 6})
+	result3 := Some([]int{0, 1, 2, 3, 4, 5}, []int{-1, 6})
+	result4 := Some([]int{0, 1, 2, 3, 4, 5}, []int{})
+
+	is.True(result1)
+	is.True(result2)
+	is.False(result3)
+	is.False(result4)
+}
+
+func TestSomeBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := SomeBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 5
+	})
+
+	is.True(result1)
+
+	result2 := SomeBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 3
+	})
+
+	is.True(result2)
+
+	result3 := SomeBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 0
+	})
+
+	is.False(result3)
+
+	result4 := SomeBy([]int{}, func(x int) bool {
+		return x < 5
+	})
+
+	is.False(result4)
+}
+
+func TestNone(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := None([]int{0, 1, 2, 3, 4, 5}, []int{0, 2})
+	result2 := None([]int{0, 1, 2, 3, 4, 5}, []int{0, 6})
+	result3 := None([]int{0, 1, 2, 3, 4, 5}, []int{-1, 6})
+	result4 := None([]int{0, 1, 2, 3, 4, 5}, []int{})
+
+	is.False(result1)
+	is.False(result2)
+	is.True(result3)
+	is.True(result4)
+}
+
+func TestNoneBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := NoneBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 5
+	})
+
+	is.False(result1)
+
+	result2 := NoneBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 3
+	})
+
+	is.False(result2)
+
+	result3 := NoneBy([]int{1, 2, 3, 4}, func(x int) bool {
+		return x < 0
+	})
+
+	is.True(result3)
+
+	result4 := NoneBy([]int{}, func(x int) bool {
+		return x < 5
+	})
+
+	is.True(result4)
+}
+
+func TestIntersect(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Intersect([]int{0, 1, 2, 3, 4, 5}, []int{0, 2})
+	result2 := Intersect([]int{0, 1, 2, 3, 4, 5}, []int{0, 6})
+	result3 := Intersect([]int{0, 1, 2, 3, 4, 5}, []int{-1, 6})
+	result4 := Intersect([]int{0, 6}, []int{0, 1, 2, 3, 4, 5})
+	result5 := Intersect([]int{0, 6, 0}, []int{0, 1, 2, 3, 4, 5})
+
+	is.Equal(result1, []int{0, 2})
+	is.Equal(result2, []int{0})
+	is.Equal(result3, []int{})
+	is.Equal(result4, []int{0})
+	is.Equal(result5, []int{0})
+}
+
+func TestDifference(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	left1, right1 := Difference([]int{0, 1, 2, 3, 4, 5}, []int{0, 2, 6})
+	is.Equal(left1, []int{1, 3, 4, 5})
+	is.Equal(right1, []int{6})
+
+	left2, right2 := Difference([]int{1, 2, 3, 4, 5}, []int{0, 6})
+	is.Equal(left2, []int{1, 2, 3, 4, 5})
+	is.Equal(right2, []int{0, 6})
+
+	left3, right3 := Difference([]int{0, 1, 2, 3, 4, 5}, []int{0, 1, 2, 3, 4, 5})
+	is.Equal(left3, []int{})
+	is.Equal(right3, []int{})
+}
+
+func TestUnion(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Union([]int{0, 1, 2, 3, 4, 5}, []int{0, 2, 10})
+	result2 := Union([]int{0, 1, 2, 3, 4, 5}, []int{6, 7})
+	result3 := Union([]int{0, 1, 2, 3, 4, 5}, []int{})
+	result4 := Union([]int{0, 1, 2}, []int{0, 1, 2})
+	result5 := Union([]int{}, []int{})
+	is.Equal(result1, []int{0, 1, 2, 3, 4, 5, 10})
+	is.Equal(result2, []int{0, 1, 2, 3, 4, 5, 6, 7})
+	is.Equal(result3, []int{0, 1, 2, 3, 4, 5})
+	is.Equal(result4, []int{0, 1, 2})
+	is.Equal(result5, []int{})
+
+	result11 := Union([]int{0, 1, 2, 3, 4, 5}, []int{0, 2, 10}, []int{0, 1, 11})
+	result12 := Union([]int{0, 1, 2, 3, 4, 5}, []int{6, 7}, []int{8, 9})
+	result13 := Union([]int{0, 1, 2, 3, 4, 5}, []int{}, []int{})
+	result14 := Union([]int{0, 1, 2}, []int{0, 1, 2}, []int{0, 1, 2})
+	result15 := Union([]int{}, []int{}, []int{})
+	is.Equal(result11, []int{0, 1, 2, 3, 4, 5, 10, 11})
+	is.Equal(result12, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
+	is.Equal(result13, []int{0, 1, 2, 3, 4, 5})
+	is.Equal(result14, []int{0, 1, 2})
+	is.Equal(result15, []int{})
+}
+
+func TestWithout(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Without([]int{0, 2, 10}, 0, 1, 2, 3, 4, 5)
+	result2 := Without([]int{0, 7}, 0, 1, 2, 3, 4, 5)
+	result3 := Without([]int{}, 0, 1, 2, 3, 4, 5)
+	result4 := Without([]int{0, 1, 2}, 0, 1, 2)
+	result5 := Without([]int{})
+	is.Equal(result1, []int{10})
+	is.Equal(result2, []int{7})
+	is.Equal(result3, []int{})
+	is.Equal(result4, []int{})
+	is.Equal(result5, []int{})
+}
+
+func TestWithoutEmpty(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := WithoutEmpty([]int{0, 1, 2})
+	result2 := WithoutEmpty([]int{1, 2})
+	result3 := WithoutEmpty([]int{})
+	is.Equal(result1, []int{1, 2})
+	is.Equal(result2, []int{1, 2})
+	is.Equal(result3, []int{})
+}
 
 func TestFilter(t *testing.T) {
 	t.Parallel()
@@ -286,4 +544,335 @@ func TestReplaceAll(t *testing.T) {
 
 	is.Equal([]int{42, 1, 42, 1, 2, 3, 42}, out1)
 	is.Equal([]int{0, 1, 0, 1, 2, 3, 0}, out2)
+}
+
+func TestIndexOf(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := IndexOf([]int{0, 1, 2, 1, 2, 3}, 2)
+	result2 := IndexOf([]int{0, 1, 2, 1, 2, 3}, 6)
+
+	is.Equal(result1, 2)
+	is.Equal(result2, -1)
+}
+
+func TestLastIndexOf(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := LastIndexOf([]int{0, 1, 2, 1, 2, 3}, 2)
+	result2 := LastIndexOf([]int{0, 1, 2, 1, 2, 3}, 6)
+
+	is.Equal(result1, 4)
+	is.Equal(result2, -1)
+}
+
+func TestFind(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	index := 0
+	result1, ok1 := Find([]string{"a", "b", "c", "d"}, func(item string) bool {
+		is.Equal([]string{"a", "b", "c", "d"}[index], item)
+		index++
+		return item == "b"
+	})
+
+	result2, ok2 := Find([]string{"foobar"}, func(item string) bool {
+		is.Equal("foobar", item)
+		return item == "b"
+	})
+
+	is.Equal(ok1, true)
+	is.Equal(result1, "b")
+	is.Equal(ok2, false)
+	is.Equal(result2, "")
+}
+
+func TestFindIndexOf(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	index := 0
+	item1, index1, ok1 := FindIndexOf([]string{"a", "b", "c", "d", "b"}, func(item string) bool {
+		is.Equal([]string{"a", "b", "c", "d", "b"}[index], item)
+		index++
+		return item == "b"
+	})
+	item2, index2, ok2 := FindIndexOf([]string{"foobar"}, func(item string) bool {
+		is.Equal("foobar", item)
+		return item == "b"
+	})
+
+	is.Equal(item1, "b")
+	is.Equal(ok1, true)
+	is.Equal(index1, 1)
+	is.Equal(item2, "")
+	is.Equal(ok2, false)
+	is.Equal(index2, -1)
+}
+
+func TestFindLastIndexOf(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	index := 0
+	item1, index1, ok1 := FindLastIndexOf([]string{"a", "b", "c", "d", "b"}, func(item string) bool {
+		is.Equal([]string{"b", "d", "c", "b", "a"}[index], item)
+		index++
+		return item == "b"
+	})
+	item2, index2, ok2 := FindLastIndexOf([]string{"foobar"}, func(item string) bool {
+		is.Equal("foobar", item)
+		return item == "b"
+	})
+
+	is.Equal(item1, "b")
+	is.Equal(ok1, true)
+	is.Equal(index1, 4)
+	is.Equal(item2, "")
+	is.Equal(ok2, false)
+	is.Equal(index2, -1)
+}
+
+func TestFindOrElse(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	index := 0
+	result1 := FindOrElse([]string{"a", "b", "c", "d"}, "x", func(item string) bool {
+		is.Equal([]string{"a", "b", "c", "d"}[index], item)
+		index++
+		return item == "b"
+	})
+	result2 := FindOrElse([]string{"foobar"}, "x", func(item string) bool {
+		is.Equal("foobar", item)
+		return item == "b"
+	})
+
+	is.Equal(result1, "b")
+	is.Equal(result2, "x")
+}
+
+
+func TestFindUniques(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := FindUniques([]int{1, 2, 3})
+
+	is.Equal(3, len(result1))
+	is.Equal([]int{1, 2, 3}, result1)
+
+	result2 := FindUniques([]int{1, 2, 2, 3, 1, 2})
+
+	is.Equal(1, len(result2))
+	is.Equal([]int{3}, result2)
+
+	result3 := FindUniques([]int{1, 2, 2, 1})
+
+	is.Equal(0, len(result3))
+	is.Equal([]int{}, result3)
+
+	result4 := FindUniques([]int{})
+
+	is.Equal(0, len(result4))
+	is.Equal([]int{}, result4)
+}
+
+func TestFindUniquesBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := FindUniquesBy([]int{0, 1, 2}, func(i int) int {
+		return i % 3
+	})
+
+	is.Equal(3, len(result1))
+	is.Equal([]int{0, 1, 2}, result1)
+
+	result2 := FindUniquesBy([]int{0, 1, 2, 3, 4}, func(i int) int {
+		return i % 3
+	})
+
+	is.Equal(1, len(result2))
+	is.Equal([]int{2}, result2)
+
+	result3 := FindUniquesBy([]int{0, 1, 2, 3, 4, 5}, func(i int) int {
+		return i % 3
+	})
+
+	is.Equal(0, len(result3))
+	is.Equal([]int{}, result3)
+
+	result4 := FindUniquesBy([]int{}, func(i int) int {
+		return i % 3
+	})
+
+	is.Equal(0, len(result4))
+	is.Equal([]int{}, result4)
+}
+
+func TestFindDuplicates(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := FindDuplicates([]int{1, 2, 2, 1, 2, 3})
+
+	is.Equal(2, len(result1))
+	is.Equal([]int{1, 2}, result1)
+
+	result2 := FindDuplicates([]int{1, 2, 3})
+
+	is.Equal(0, len(result2))
+	is.Equal([]int{}, result2)
+
+	result3 := FindDuplicates([]int{})
+
+	is.Equal(0, len(result3))
+	is.Equal([]int{}, result3)
+}
+
+func TestFindDuplicatesBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := FindDuplicatesBy([]int{3, 4, 5, 6, 7}, func(i int) int {
+		return i % 3
+	})
+
+	is.Equal(2, len(result1))
+	is.Equal([]int{3, 4}, result1)
+
+	result2 := FindDuplicatesBy([]int{0, 1, 2, 3, 4}, func(i int) int {
+		return i % 5
+	})
+
+	is.Equal(0, len(result2))
+	is.Equal([]int{}, result2)
+
+	result3 := FindDuplicatesBy([]int{}, func(i int) int {
+		return i % 3
+	})
+
+	is.Equal(0, len(result3))
+	is.Equal([]int{}, result3)
+}
+
+func TestMin(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Min([]int{1, 2, 3})
+	result2 := Min([]int{3, 2, 1})
+	result3 := Min([]int{})
+
+	is.Equal(result1, 1)
+	is.Equal(result2, 1)
+	is.Equal(result3, 0)
+}
+
+func TestMinBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := MinBy([]string{"s1", "string2", "s3"}, func(item string, min string) bool {
+		return len(item) < len(min)
+	})
+	result2 := MinBy([]string{"string1", "string2", "s3"}, func(item string, min string) bool {
+		return len(item) < len(min)
+	})
+	result3 := MinBy([]string{}, func(item string, min string) bool {
+		return len(item) < len(min)
+	})
+
+	is.Equal(result1, "s1")
+	is.Equal(result2, "s3")
+	is.Equal(result3, "")
+}
+
+func TestMax(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Max([]int{1, 2, 3})
+	result2 := Max([]int{3, 2, 1})
+	result3 := Max([]int{})
+
+	is.Equal(result1, 3)
+	is.Equal(result2, 3)
+	is.Equal(result3, 0)
+}
+
+func TestMaxBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := MaxBy([]string{"s1", "string2", "s3"}, func(item string, max string) bool {
+		return len(item) > len(max)
+	})
+	result2 := MaxBy([]string{"string1", "string2", "s3"}, func(item string, max string) bool {
+		return len(item) > len(max)
+	})
+	result3 := MaxBy([]string{}, func(item string, max string) bool {
+		return len(item) > len(max)
+	})
+
+	is.Equal(result1, "string2")
+	is.Equal(result2, "string1")
+	is.Equal(result3, "")
+}
+
+func TestLast(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1, err1 := Last([]int{1, 2, 3})
+	result2, err2 := Last([]int{})
+
+	is.Equal(result1, 3)
+	is.Equal(err1, nil)
+	is.Equal(result2, 0)
+	is.Equal(err2, fmt.Errorf("last: cannot extract the last element of an empty slice"))
+}
+
+func TestNth(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1, err1 := Nth([]int{0, 1, 2, 3}, 2)
+	result2, err2 := Nth([]int{0, 1, 2, 3}, -2)
+	result3, err3 := Nth([]int{0, 1, 2, 3}, 42)
+	result4, err4 := Nth([]int{}, 0)
+	result5, err5 := Nth([]int{42}, 0)
+	result6, err6 := Nth([]int{42}, -1)
+
+	is.Equal(result1, 2)
+	is.Equal(err1, nil)
+	is.Equal(result2, 2)
+	is.Equal(err2, nil)
+	is.Equal(result3, 0)
+	is.Equal(err3, fmt.Errorf("nth: 42 out of slice bounds"))
+	is.Equal(result4, 0)
+	is.Equal(err4, fmt.Errorf("nth: 0 out of slice bounds"))
+	is.Equal(result5, 42)
+	is.Equal(err5, nil)
+	is.Equal(result6, 42)
+	is.Equal(err6, nil)
+}
+
+func TestSamples(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	rand.Seed(time.Now().UnixNano())
+
+	result1 := Samples([]string{"a", "b", "c"}, 3)
+	result2 := Samples([]string{}, 3)
+
+	sort.Strings(result1)
+
+	is.Equal(result1, []string{"a", "b", "c"})
+	is.Equal(result2, []string{})
 }

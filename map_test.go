@@ -218,3 +218,45 @@ func TestMapToSlice(t *testing.T) {
 	is.ElementsMatch(result1, []string{"1_5", "2_6", "3_7", "4_8"})
 	is.ElementsMatch(result2, []string{"1", "2", "3", "4"})
 }
+
+func TestFindKey(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1, ok1 := FindKey(map[string]int{"foo": 1, "bar": 2, "baz": 3}, 2)
+	is.Equal("bar", result1)
+	is.True(ok1)
+
+	result2, ok2 := FindKey(map[string]int{"foo": 1, "bar": 2, "baz": 3}, 42)
+	is.Equal("", result2)
+	is.False(ok2)
+
+	type test struct {
+		foobar string
+	}
+
+	result3, ok3 := FindKey(map[string]test{"foo": {"foo"}, "bar": {"bar"}, "baz": {"baz"}}, test{"foo"})
+	is.Equal("foo", result3)
+	is.True(ok3)
+
+	result4, ok4 := FindKey(map[string]test{"foo": {"foo"}, "bar": {"bar"}, "baz": {"baz"}}, test{"hello world"})
+	is.Equal("", result4)
+	is.False(ok4)
+}
+
+func TestFindKeyBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1, ok1 := FindKeyBy(map[string]int{"foo": 1, "bar": 2, "baz": 3}, func(k string, v int) bool {
+		return k == "foo"
+	})
+	is.Equal("foo", result1)
+	is.True(ok1)
+
+	result2, ok2 := FindKeyBy(map[string]int{"foo": 1, "bar": 2, "baz": 3}, func(k string, v int) bool {
+		return false
+	})
+	is.Equal("", result2)
+	is.False(ok2)
+}

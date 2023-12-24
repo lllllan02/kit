@@ -179,19 +179,30 @@ func TestNoneBy(t *testing.T) {
 
 func TestIntersect(t *testing.T) {
 	t.Parallel()
-	is := assert.New(t)
 
-	result1 := Intersect([]int{0, 1, 2, 3, 4, 5}, []int{0, 2})
-	result2 := Intersect([]int{0, 1, 2, 3, 4, 5}, []int{0, 6})
-	result3 := Intersect([]int{0, 1, 2, 3, 4, 5}, []int{-1, 6})
-	result4 := Intersect([]int{0, 6}, []int{0, 1, 2, 3, 4, 5})
-	result5 := Intersect([]int{0, 6, 0}, []int{0, 1, 2, 3, 4, 5})
+	assert := assert.New(t)
 
-	is.Equal(result1, []int{0, 2})
-	is.Equal(result2, []int{0})
-	is.Equal(result3, []int{})
-	is.Equal(result4, []int{0})
-	is.Equal(result5, []int{0})
+	s1 := []int{1, 2, 2, 3}
+	s2 := []int{1, 2, 3, 4}
+	s3 := []int{0, 2, 3, 5, 6}
+	s4 := []int{0, 5, 6}
+
+	expected := [][]int{
+		{2, 3},
+		{1, 2, 3},
+		{1, 2, 3},
+		{},
+	}
+	result := []any{
+		Intersect(s1, s2, s3),
+		Intersect(s1, s2),
+		Intersect(s1),
+		Intersect(s1, s4),
+	}
+
+	for i := 0; i < len(result); i++ {
+		assert.Equal(expected[i], result[i])
+	}
 }
 
 func TestDifference(t *testing.T) {
@@ -655,7 +666,6 @@ func TestFindOrElse(t *testing.T) {
 	is.Equal(result2, "x")
 }
 
-
 func TestFindUniques(t *testing.T) {
 	t.Parallel()
 	is := assert.New(t)
@@ -875,4 +885,209 @@ func TestSamples(t *testing.T) {
 
 	is.Equal(result1, []string{"a", "b", "c"})
 	is.Equal(result2, []string{})
+}
+
+func TestCompact(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	is.Equal([]int{}, Compact([]int{0}))
+	is.Equal([]int{1, 2, 3}, Compact([]int{0, 1, 2, 3}))
+	is.Equal([]string{}, Compact([]string{""}))
+	is.Equal([]string{" "}, Compact([]string{" "}))
+	is.Equal([]string{"a", "b", "0"}, Compact([]string{"", "a", "b", "0"}))
+	is.Equal([]bool{true, true}, Compact([]bool{false, true, true}))
+}
+
+func TestConcat(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	is.Equal([]int{1, 2, 3, 4, 5}, Concat([]int{1, 2, 3}, []int{4, 5}))
+	is.Equal([]int{1, 2, 3, 4, 5}, Concat([]int{1, 2, 3}, []int{4}, []int{5}))
+}
+
+func TestEqual(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	slice1 := []int{1, 2, 3}
+	slice2 := []int{1, 2, 3}
+	slice3 := []int{3, 2, 1}
+
+	assert.Equal(true, Equal(slice1, slice2))
+	assert.Equal(false, Equal(slice1, slice3))
+}
+
+func TestCountBy(t *testing.T) {
+	t.Parallel()
+
+	nums := []int{1, 2, 3, 4, 5, 6}
+	evenFunc := func(i, num int) bool {
+		return (num % 2) == 0
+	}
+
+	assert := assert.New(t)
+	assert.Equal(3, CountBy(nums, evenFunc))
+}
+
+func TestDeleteAt(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal([]string{"a", "b", "c"}, DeleteAt([]string{"a", "b", "c"}, -1))
+	assert.Equal([]string{"a", "b", "c"}, DeleteAt([]string{"a", "b", "c"}, 3))
+	assert.Equal([]string{"b", "c"}, DeleteAt([]string{"a", "b", "c"}, 0))
+	assert.Equal([]string{"a", "c"}, DeleteAt([]string{"a", "b", "c"}, 1))
+	assert.Equal([]string{"a", "b"}, DeleteAt([]string{"a", "b", "c"}, 2))
+
+	assert.Equal([]string{"b", "c"}, DeleteAt([]string{"a", "b", "c"}, 0, 1))
+	assert.Equal([]string{"c"}, DeleteAt([]string{"a", "b", "c"}, 0, 2))
+	assert.Equal([]string{}, DeleteAt([]string{"a", "b", "c"}, 0, 3))
+	assert.Equal([]string{}, DeleteAt([]string{"a", "b", "c"}, 0, 4))
+	assert.Equal([]string{"a"}, DeleteAt([]string{"a", "b", "c"}, 1, 3))
+	assert.Equal([]string{"a"}, DeleteAt([]string{"a", "b", "c"}, 1, 4))
+}
+
+func TestInsertAt(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	strs := []string{"a", "b", "c"}
+	assert.Equal([]string{"1", "a", "b", "c"}, InsertAt(strs, -1, "1"))
+	assert.Equal([]string{"1", "a", "b", "c"}, InsertAt(strs, 0, "1"))
+	assert.Equal([]string{"a", "1", "b", "c"}, InsertAt(strs, 1, "1"))
+	assert.Equal([]string{"a", "b", "1", "c"}, InsertAt(strs, 2, "1"))
+	assert.Equal([]string{"a", "b", "c", "1"}, InsertAt(strs, 3, "1"))
+	assert.Equal([]string{"a", "b", "c", "1"}, InsertAt(strs, 4, "1"))
+	assert.Equal([]string{"1", "2", "3", "a", "b", "c"}, InsertAt(strs, 0, []string{"1", "2", "3"}...))
+	assert.Equal([]string{"a", "b", "c", "1", "2", "3"}, InsertAt(strs, 3, []string{"1", "2", "3"}...))
+}
+
+func TestUpdateAt(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal([]string{"a", "b", "c"}, UpdateAt([]string{"a", "b", "c"}, -1, "1"))
+	assert.Equal([]string{"1", "b", "c"}, UpdateAt([]string{"a", "b", "c"}, 0, "1"))
+	assert.Equal([]string{"a", "b", "2"}, UpdateAt([]string{"a", "b", "c"}, 2, "2"))
+	assert.Equal([]string{"a", "b", "c"}, UpdateAt([]string{"a", "b", "c"}, 3, "2"))
+}
+
+func TestUnionBy(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	testFunc := func(i int) int {
+		return i / 2
+	}
+
+	result := UnionBy(testFunc, []int{0, 1, 2, 3, 4, 5}, []int{0, 2, 10})
+	assert.Equal(result, []int{0, 2, 4, 10})
+}
+
+func TestMerge(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	s1 := []int{1, 2, 3, 4}
+	s2 := []int{2, 3, 4, 5}
+	s3 := []int{4, 5, 6}
+
+	assert.Equal([]int{1, 2, 3, 4, 2, 3, 4, 5, 4, 5, 6}, Merge(s1, s2, s3))
+	assert.Equal([]int{1, 2, 3, 4, 2, 3, 4, 5}, Merge(s1, s2))
+	assert.Equal([]int{2, 3, 4, 5, 4, 5, 6}, Merge(s2, s3))
+}
+
+func TestIsAscending(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal(true, IsAscending([]int{1, 2, 3, 4, 5}))
+	assert.Equal(false, IsAscending([]int{5, 4, 3, 2, 1}))
+	assert.Equal(false, IsAscending([]int{2, 1, 3, 4, 5}))
+}
+
+func TestIsDescending(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal(true, IsDescending([]int{5, 4, 3, 2, 1}))
+	assert.Equal(false, IsDescending([]int{1, 2, 3, 4, 5}))
+	assert.Equal(false, IsDescending([]int{2, 1, 3, 4, 5}))
+}
+
+func TestIsSorted(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal(true, IsSorted([]int{5, 4, 3, 2, 1}))
+	assert.Equal(true, IsSorted([]int{1, 2, 3, 4, 5}))
+	assert.Equal(false, IsSorted([]int{2, 1, 3, 4, 5}))
+}
+
+func TestAppendIfAbsent(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	str1 := []string{"a", "b"}
+	assert.Equal([]string{"a", "b"}, AppendIfAbsent(str1, "a"))
+	assert.Equal([]string{"a", "b", "c"}, AppendIfAbsent(str1, "c"))
+}
+
+func TestMap(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	nums := []int{1, 2, 3, 4}
+	multiplyTwo := func(i, num int) int {
+		return num * 2
+	}
+
+	assert.Equal([]int{2, 4, 6, 8}, Map(nums, multiplyTwo))
+
+	type student struct {
+		name string
+		age  int
+	}
+	students := []student{
+		{"a", 1},
+		{"b", 2},
+		{"c", 3},
+	}
+	studentsOfAdd10Aage := []student{
+		{"a", 11},
+		{"b", 12},
+		{"c", 13},
+	}
+	mapFunc := func(i int, s student) student {
+		s.age += 10
+		return s
+	}
+
+	assert.Equal(studentsOfAdd10Aage, Map(students, mapFunc))
+}
+
+func TestJoin(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	nums := []int{1, 2, 3, 4, 5}
+
+	result1 := Join(nums, ",")
+	result2 := Join(nums, "-")
+
+	assert.Equal("1,2,3,4,5", result1)
+	assert.Equal("1-2-3-4-5", result2)
 }

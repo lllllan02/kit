@@ -154,6 +154,62 @@ func Difference[T comparable](slice []T, compare []T) ([]T, []T) {
 	return left, right
 }
 
+// Drop 删除数组的前 n 个元素。
+func Drop[T any](slice []T, n int) []T {
+	size := len(slice)
+
+	if size <= n {
+		return []T{}
+	}
+
+	if n <= 0 {
+		return slice
+	}
+
+	return append([]T{}, slice[n:]...)
+}
+
+// DropRight 删除数组的后 n 个元素。
+func DropRight[T any](slice []T, n int) []T {
+	size := len(slice)
+
+	if size <= n {
+		return []T{}
+	}
+
+	if n <= 0 {
+		return slice
+	}
+
+	return append([]T{}, slice[:size-n]...)
+}
+
+// DropRightWhile 删除数组后方所有满足 predicate 的元素。
+func DropRightWhile[T any](slice []T, predicate func(T) bool) []T {
+	i := len(slice) - 1
+
+	for ; i >= 0; i-- {
+		if !predicate(slice[i]) {
+			break
+		}
+	}
+
+	return append([]T{}, slice[:i+1]...)
+}
+
+// DropWhile 删除数组前方所有满足 predicate 的元素。
+func DropWhile[T any](slice []T, predicate func(T) bool) []T {
+	i := 0
+
+	for ; i < len(slice); i++ {
+		if !predicate(slice[i]) {
+			break
+		}
+	}
+
+	return append([]T{}, slice[i:]...)
+}
+
 // Equal 比较两个数组是否相等，即拥有相同长度并且每个位置上的元素相同。
 func Equal[T comparable](slice1 []T, slice2 []T) bool {
 	if len(slice1) != len(slice2) {

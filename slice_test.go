@@ -1027,3 +1027,83 @@ func TestJoin(t *testing.T) {
 	assert.Equal("1,2,3,4,5", result1)
 	assert.Equal("1-2-3-4-5", result2)
 }
+
+func TestDrop(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal([]int{}, Drop([]int{}, 0))
+	assert.Equal([]int{}, Drop([]int{}, 1))
+	assert.Equal([]int{}, Drop([]int{}, -1))
+
+	assert.Equal([]int{1, 2, 3, 4, 5}, Drop([]int{1, 2, 3, 4, 5}, 0))
+	assert.Equal([]int{2, 3, 4, 5}, Drop([]int{1, 2, 3, 4, 5}, 1))
+	assert.Equal([]int{}, Drop([]int{1, 2, 3, 4, 5}, 5))
+	assert.Equal([]int{}, Drop([]int{1, 2, 3, 4, 5}, 6))
+
+	assert.Equal([]int{1, 2, 3, 4, 5}, Drop([]int{1, 2, 3, 4, 5}, -1))
+}
+
+func TestDropRight(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal([]int{}, DropRight([]int{}, 0))
+	assert.Equal([]int{}, DropRight([]int{}, 1))
+	assert.Equal([]int{}, DropRight([]int{}, -1))
+
+	assert.Equal([]int{1, 2, 3, 4, 5}, DropRight([]int{1, 2, 3, 4, 5}, 0))
+	assert.Equal([]int{1, 2, 3, 4}, DropRight([]int{1, 2, 3, 4, 5}, 1))
+	assert.Equal([]int{}, DropRight([]int{1, 2, 3, 4, 5}, 5))
+	assert.Equal([]int{}, DropRight([]int{1, 2, 3, 4, 5}, 6))
+
+	assert.Equal([]int{1, 2, 3, 4, 5}, DropRight([]int{1, 2, 3, 4, 5}, -1))
+}
+
+func TestDropWhile(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	numbers := []int{1, 2, 3, 4, 5}
+
+	r1 := DropWhile(numbers, func(n int) bool {
+		return n != 2
+	})
+	assert.Equal([]int{2, 3, 4, 5}, r1)
+
+	r2 := DropWhile(numbers, func(n int) bool {
+		return true
+	})
+	assert.Equal([]int{}, r2)
+
+	r3 := DropWhile(numbers, func(n int) bool {
+		return n == 0
+	})
+	assert.Equal([]int{1, 2, 3, 4, 5}, r3)
+}
+
+func TestDropRightWhile(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	numbers := []int{1, 2, 3, 4, 5}
+
+	r1 := DropRightWhile(numbers, func(n int) bool {
+		return n != 2
+	})
+	assert.Equal([]int{1, 2}, r1)
+
+	r2 := DropRightWhile(numbers, func(n int) bool {
+		return true
+	})
+	assert.Equal([]int{}, r2)
+
+	r3 := DropRightWhile(numbers, func(n int) bool {
+		return n == 0
+	})
+	assert.Equal([]int{1, 2, 3, 4, 5}, r3)
+}

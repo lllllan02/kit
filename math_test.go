@@ -120,3 +120,93 @@ func TestRound(t *testing.T) {
 	is.Equal(Round(float64(55.555), 3), float64(55.555))
 	is.Equal(Round(float64(55.555), 4), float64(55.5550))
 }
+
+func TestMax(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Max(1, 2, 3)
+	result2 := Max(3, 2, 1)
+	result3 := Max[int]()
+
+	is.Equal(result1, 3)
+	is.Equal(result2, 3)
+	is.Equal(result3, 0)
+}
+
+func TestMaxBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := MaxBy(func(item string, max string) bool {
+		return len(item) > len(max)
+	}, "s1", "string2", "s3")
+	result2 := MaxBy(func(item string, max string) bool {
+		return len(item) > len(max)
+	}, "string1", "string2", "s3")
+	result3 := MaxBy(func(item string, max string) bool {
+		return len(item) > len(max)
+	})
+
+	is.Equal(result1, "string2")
+	is.Equal(result2, "string1")
+	is.Equal(result3, "")
+}
+
+func TestMin(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := Min(1, 2, 3)
+	result2 := Min(3, 2, 1)
+	result3 := Min[int]()
+
+	is.Equal(result1, 1)
+	is.Equal(result2, 1)
+	is.Equal(result3, 0)
+}
+
+func TestMinBy(t *testing.T) {
+	t.Parallel()
+	is := assert.New(t)
+
+	result1 := MinBy(func(item string, min string) bool {
+		return len(item) < len(min)
+	}, "s1", "string2", "s3")
+	result2 := MinBy(func(item string, min string) bool {
+		return len(item) < len(min)
+	}, "string1", "string2", "s3")
+	result3 := MinBy(func(item string, min string) bool {
+		return len(item) < len(min)
+	})
+
+	is.Equal(result1, "s1")
+	is.Equal(result2, "s3")
+	is.Equal(result3, "")
+}
+
+func TestAverage(t *testing.T) {
+	t.Parallel()
+
+	is := assert.New(t)
+
+	is.Equal(0, Average([]int{0, 0}))
+	is.Equal(1, Average([]int{1, 1}))
+
+	avg := Average([]float64{1.2, 1.4})
+	is.Equal(1.3, Round(avg, 1))
+}
+
+func TestAbs(t *testing.T) {
+	t.Parallel()
+
+	assert := assert.New(t)
+
+	assert.Equal(0, Abs(0))
+	assert.Equal(1, Abs(-1))
+
+	assert.Equal(0.1, Abs(-0.1))
+
+	assert.Equal(int64(1), Abs(int64(-1)))
+	assert.Equal(float32(1), Abs(float32(-1)))
+}

@@ -509,43 +509,6 @@ func Map[T any, U any](slice []T, iteratee func(int, T) U) []U {
 	return result
 }
 
-// Max 搜索集合的最大值。当集合为空时返回零值。
-func Max[T constraints.Ordered](slice []T) T {
-	if len(slice) == 0 {
-		return Empty[T]()
-	}
-
-	max := slice[0]
-
-	for i := 1; i < len(slice); i++ {
-		item := slice[i]
-
-		max = Ternary(item > max, item, max)
-	}
-
-	return max
-}
-
-// MaxBy 使用给定的比较函数搜索集合的最大值。
-// 如果集合的几个值等于最大值，则返回第一个这样的值。当集合为空时返回零值。
-//
-// 比较函数，当传入的第一个参数大于第二个参数时返回 true。
-func MaxBy[T any](slice []T, comparison func(T, T) bool) T {
-	if len(slice) == 0 {
-		return Empty[T]()
-	}
-
-	max := slice[0]
-
-	for i := 1; i < len(slice); i++ {
-		item := slice[i]
-
-		max = Ternary(comparison(item, max), item, max)
-	}
-
-	return max
-}
-
 // Merge 合并所有数组。
 func Merge[T any](slices ...[]T) []T {
 	result := []T{}
@@ -555,43 +518,6 @@ func Merge[T any](slices ...[]T) []T {
 	}
 
 	return result
-}
-
-// Min 搜索集合的最小值。当集合为空时返回零值。
-func Min[T constraints.Ordered](slice []T) T {
-	if len(slice) == 0 {
-		return Empty[T]()
-	}
-
-	min := slice[0]
-
-	for i := 1; i < len(slice); i++ {
-		item := slice[i]
-
-		min = Ternary(item < min, item, min)
-	}
-
-	return min
-}
-
-// MinBy 使用给定的比较函数搜索集合的最小值。
-// 如果集合的几个值等于最小值，则返回第一个这样的值。当集合为空时返回零值。
-//
-// 比较函数，当传入的第一个参数小于第二个参数时返回 true。
-func MinBy[T any](slice []T, comparison func(T, T) bool) T {
-	if len(slice) == 0 {
-		return Empty[T]()
-	}
-
-	min := slice[0]
-
-	for i := 1; i < len(slice); i++ {
-		item := slice[i]
-
-		min = Ternary(comparison(item, min), item, min)
-	}
-
-	return min
 }
 
 // Nth 返回集合索引 “n” 处的元素。

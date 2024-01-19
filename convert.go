@@ -763,6 +763,26 @@ func ToFloat64E(i interface{}) (float64, error) {
 	}
 }
 
+// ToJSON converts an interface to a valid JSON string.
+func ToJSON(obj interface{}) string {
+	v, _ := ToJSONE(obj)
+	return v
+}
+
+func ToJSONE(obj interface{}) (string, error) {
+	res, err := json.Marshal(obj)
+	if err != nil {
+		res = []byte("")
+	}
+	return string(res), err
+}
+
+// ToString converts an interface to a string.
+func ToString(obj interface{}) string {
+	res := fmt.Sprintf("%v", obj)
+	return res
+}
+
 // From html/template/content.go
 // Copyright 2011 The Go Authors. All rights reserved.
 // indirect returns the value, after dereferencing as many times

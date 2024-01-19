@@ -55,9 +55,9 @@ func ToBoolE(i interface{}) (bool, error) {
 		if err == nil {
 			return v != 0, nil
 		}
-		return false, fmt.Errorf("unable to cast %#v of type %T to bool", i, i)
+		return false, fmt.Errorf("unable to convert %#v of type %T to bool", i, i)
 	default:
-		return false, fmt.Errorf("unable to cast %#v of type %T to bool", i, i)
+		return false, fmt.Errorf("unable to convert %#v of type %T to bool", i, i)
 	}
 }
 
@@ -684,12 +684,12 @@ func ToFloat32E(i interface{}) (float32, error) {
 		if err == nil {
 			return float32(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v of type %T to float32", i, i)
+		return 0, fmt.Errorf("unable to convert %#v of type %T to float32", i, i)
 	case json.Number:
 		if v, err := t.Float64(); err == nil {
 			return float32(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v of type %T to float32", i, i)
+		return 0, fmt.Errorf("unable to convert %#v of type %T to float32", i, i)
 	case bool:
 		if t {
 			return 1, nil
@@ -698,7 +698,7 @@ func ToFloat32E(i interface{}) (float32, error) {
 	case nil:
 		return 0, nil
 	default:
-		return 0, fmt.Errorf("unable to cast %#v of type %T to float32", i, i)
+		return 0, fmt.Errorf("unable to convert %#v of type %T to float32", i, i)
 	}
 }
 
@@ -745,12 +745,12 @@ func ToFloat64E(i interface{}) (float64, error) {
 		if err == nil {
 			return float64(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v of type %T to float64", i, i)
+		return 0, fmt.Errorf("unable to convert %#v of type %T to float64", i, i)
 	case json.Number:
 		if v, err := t.Float64(); err == nil {
 			return float64(v), nil
 		}
-		return 0, fmt.Errorf("unable to cast %#v of type %T to float64", i, i)
+		return 0, fmt.Errorf("unable to convert %#v of type %T to float64", i, i)
 	case bool:
 		if t {
 			return 1, nil
@@ -759,7 +759,7 @@ func ToFloat64E(i interface{}) (float64, error) {
 	case nil:
 		return 0, nil
 	default:
-		return 0, fmt.Errorf("unable to cast %#v of type %T to float64", i, i)
+		return 0, fmt.Errorf("unable to convert %#v of type %T to float64", i, i)
 	}
 }
 
